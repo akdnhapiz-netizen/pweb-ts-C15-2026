@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin (Sementara)</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="page-center">
+    <main class="card login-card text-center">
+        <div class="navbar-brand">Dashboard Admin</div>
+        <p class="mt-3">Login admin berhasil.</p>
+        <p class="text-muted mb-3">Halaman ini sementara, nanti diganti file milik Agoy.</p>
+        <button id="btnLogout" class="btn btn-danger w-100">Keluar</button>
+    </main>
+
+    <script>
+        document.getElementById('btnLogout').addEventListener('click', function () {
+            localStorage.removeItem('authData');
+            window.location.href = 'login.html';
+        });
+    </script>
+</body>
+
+</html>
