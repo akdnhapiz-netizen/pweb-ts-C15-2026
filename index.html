@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - Sistem Antrean</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="navbar-brand">Sistem Antrean</div>
+
+        <div class="d-flex align-items-center">
+            <div class="mr-3">
+                <strong id="userName">Pengguna</strong>
+                <span class="text-muted">·</span>
+                <span id="userRole">Admin</span>
+            </div>
+
+            <button id="btnLogout" class="btn btn-danger" type="button">
+                Logout
+            </button>
+        </div>
+    </nav>
+
+    <main class="container">
+        <h1 class="mb-1">Dashboard Admin</h1>
+        <p class="text-muted mb-4">
+            Kelola layanan, tiket manual, dan antrean pengunjung.
+        </p>
+
+        <div id="messageBox" class="alert" hidden></div>
+
+        <section class="card mb-4">
+            <h2 class="section-title">Tambah Layanan</h2>
+
+            <form id="serviceForm" class="form">
+                <label for="serviceCode">Kode Layanan</label>
+                <input
+                    id="serviceCode"
+                    class="form-control"
+                    type="text"
+                    maxlength="1"
+                    placeholder="Contoh: A"
+                    required
+                >
+
+                <label for="serviceName">Nama Layanan</label>
+                <input
+                    id="serviceName"
+                    class="form-control"
+                    type="text"
+                    placeholder="Contoh: Poli Umum"
+                    required
+                >
+
+                <button class="btn btn-primary" type="submit">
+                    Tambah Layanan
+                </button>
+            </form>
+        </section>
+
+        <section class="mb-4">
+            <h2 class="section-title">Daftar Layanan</h2>
+            <div id="serviceList" class="grid"></div>
+        </section>
+
+        <section class="card mb-4">
+            <h2 class="section-title">Tiket Manual</h2>
+            <p class="text-muted mb-3">
+                Gunakan formulir ini untuk membantu pengunjung
+                yang tidak membawa HP.
+            </p>
+
+            <form id="ticketForm" class="form">
+                <label for="ticketService">Pilih Layanan</label>
+                <select id="ticketService" class="form-control" required>
+                    <option value="">Pilih layanan aktif</option>
+                </select>
+
+                <label for="ticketPriority">Prioritas</label>
+                <select id="ticketPriority" class="form-control" required>
+                    <option value="Normal">Normal</option>
+                    <option value="VIP">VIP</option>
+                    <option value="Disabilitas">Disabilitas</option>
+                    <option value="Lansia">Lansia</option>
+                </select>
+
+                <button class="btn btn-primary" type="submit">
+                    Terbitkan Tiket
+                </button>
+            </form>
+        </section>
+
+        <section class="card">
+            <h2 class="section-title">Reset Antrean</h2>
+            <p class="text-muted mb-3">
+                Tindakan ini menghapus semua tiket yang tersimpan.
+            </p>
+
+            <button id="btnReset" class="btn btn-danger" type="button">
+                Reset Semua Antrean
+            </button>
+        </section>
+    </main>
+
+<script type="module" src="./dist/admin.js"></script></body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ambil Antrian - Sistem Antrian</title>
+    <link rel="stylesheet" href="css/style.css">
+
+    <script type="module" src="dist/ambil-antrian.js" defer></script>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">Ambil Nomor Antrian</div>
+        <a href="login.html" class="btn btn-outline">Login Petugas</a>
+    </nav>
+
+    <div class="container">
+        <section class="mb-4">
+            <h2 class="section-title">1. Pilih Layanan</h2>
+            <div id="serviceGrid" class="service-grid"></div>
+        </section>
+
+        <section class="mb-4">
+            <h2 class="section-title">2. Pilih Prioritas</h2>
+            <div class="priority-group">
+                <label class="pill"><input type="radio" name="priority" value="Normal" checked><span>Normal</span></label>
+                <label class="pill"><input type="radio" name="priority" value="Lansia"><span>Lansia</span></label>
+                <label class="pill"><input type="radio" name="priority" value="Disabilitas"><span>Disabilitas</span></label>
+                <label class="pill"><input type="radio" name="priority" value="VIP"><span>VIP</span></label>
+            </div>
+        </section>
+
+        <div id="takeError" class="alert alert-danger" hidden></div>
+        <button id="btnTake" class="btn btn-primary btn-lg w-100" disabled>Ambil Nomor</button>
+    </div>
+
+    <div id="ticketModal" class="modal" hidden>
+        <div class="card ticket">
+            <p class="text-muted">Nomor Antrian Anda</p>
+            <p id="ticketNumber" class="ticket-number-huge"></p>
+            <p id="ticketService"></p>
+            <p id="ticketWaiting" class="text-muted"></p>
+            <p id="ticketTime" class="text-muted"></p>
+            <div class="d-flex mt-3" style="gap: 10px;">
+                <button id="btnPrint" class="btn btn-secondary w-100">Cetak</button>
+                <button id="btnClose" class="btn btn-primary w-100">Selesai</button>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
