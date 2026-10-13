@@ -3,7 +3,9 @@ class OperatorPanel {
     constructor() {
         this.gridContainer = document.getElementById('operatorGrid');
         this.btnLogout = document.getElementById('btnLogout');
+        this.btnSound = document.getElementById('btnSound');
         this.operatorName = document.getElementById('operatorName');
+        this.soundOn = false;
         this.checkAuth();
         this.initEvents();
         this.renderPanel();
@@ -13,7 +15,7 @@ class OperatorPanel {
     }
     checkAuth() {
         const auth = StorageManager.getAuth();
-        if (!auth) {
+        if (!auth || auth.role !== 'user') {
             window.location.href = 'login.html';
             return;
         }
@@ -23,6 +25,11 @@ class OperatorPanel {
         this.btnLogout.addEventListener('click', () => {
             StorageManager.clearAuth();
             window.location.href = 'login.html';
+        });
+        this.btnSound.addEventListener('click', () => {
+            this.soundOn = !this.soundOn;
+            this.btnSound.textContent = this.soundOn ? 'Suara: Aktif' : 'Suara: Mati';
+            this.btnSound.classList.toggle('active', this.soundOn);
         });
     }
     getPriorityWeight(priority) {
@@ -95,12 +102,12 @@ class OperatorPanel {
         if (!nextTicket && !currentTicket) {
             btnPanggil.disabled = true;
         }
-        btnPanggil.addEventListener('click', () => this.handleCallNext(queue.code, currentTicket === null || currentTicket === void 0 ? void 0 : currentTicket.id, nextTicket === null || nextTicket === void 0 ? void 0 : nextTicket.id));
+        btnPanggil.addEventListener('click', () => this.handleCallNext(queue, currentTicket === null || currentTicket === void 0 ? void 0 : currentTicket.id, nextTicket === null || nextTicket === void 0 ? void 0 : nextTicket.id));
         btnLewati.addEventListener('click', () => this.handleAction(currentTicket === null || currentTicket === void 0 ? void 0 : currentTicket.id, 'Dilewati'));
         btnSelesai.addEventListener('click', () => this.handleAction(currentTicket === null || currentTicket === void 0 ? void 0 : currentTicket.id, 'Selesai'));
         this.gridContainer.appendChild(card);
     }
-    handleCallNext(queueCode, currentTicketId, nextTicketId) {
+    handleCallNext(queue, currentTicketId, nextTicketId) {
         const tickets = StorageManager.getTickets();
         if (currentTicketId) {
             const currentIdx = tickets.findIndex(t => t.id === currentTicketId);
@@ -109,8 +116,10 @@ class OperatorPanel {
         }
         if (nextTicketId) {
             const nextIdx = tickets.findIndex(t => t.id === nextTicketId);
-            if (nextIdx !== -1)
+            if (nextIdx !== -1) {
                 tickets[nextIdx].status = 'Dipanggil';
+                this.announce(tickets[nextIdx], queue);
+            }
         }
         StorageManager.setTickets(tickets);
         StorageManager.triggerUpdate();
@@ -127,6 +136,42 @@ class OperatorPanel {
             StorageManager.triggerUpdate();
             this.renderPanel();
         }
+    }
+    playChime() {
+        var _a;
+        try {
+            const AudioCtx = (_a = window.AudioContext) !== null && _a !== void 0 ? _a : window.webkitAudioContext;
+            const ctx = new AudioCtx();
+            const now = ctx.currentTime;
+            [880, 660].forEach((freq, i) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.0001, now + i * 0.22);
+                gain.gain.exponentialRampToValueAtTime(0.25, now + i * 0.22 + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.22 + 0.3);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(now + i * 0.22);
+                osc.stop(now + i * 0.22 + 0.32);
+            });
+        }
+        catch (_b) {
+            // Browser tidak mendukung Web Audio API, lewati chime, lanjut ke suara teks saja.
+        }
+    }
+    announce(ticket, queue) {
+        if (!this.soundOn)
+            return;
+        this.playChime();
+        if (!('speechSynthesis' in window))
+            return;
+        const text = `Nomor antrian ${queue.code}, ${ticket.ticketNumber}. Silakan menuju ${queue.name}.`;
+        const speech = new SpeechSynthesisUtterance(text);
+        speech.lang = 'id-ID';
+        speech.rate = 0.9;
+        window.speechSynthesis.speak(speech);
     }
 }
 document.addEventListener('DOMContentLoaded', () => {
