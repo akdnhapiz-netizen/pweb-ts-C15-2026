@@ -2,38 +2,33 @@
 <html lang="id">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Layar Antrian Utama - Rumah Sakit</title>
-    <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Layar Antrian Utama - Rumah Sakit</title>
+<link rel="stylesheet" href="css/style.css">
 
-    <script type="module" src="dist/layar.js"></script>
-
-    <style>
-        body {
-            background-color: #f0f4f8;
-        }
-        
-        .ticket-active {
-            border: 3px solid var(--primary);
-            box-shadow: 0 10px 20px rgba(0, 86, 179, 0.15);
-        }
-    </style>
+<script type="module" src="dist/layar.js?v=4" defer></script>
 </head>
 
 <body>
-    <nav class="navbar" style="padding: 1.5rem 2rem;">
-        <div class="navbar-brand" style="font-size: 1.8rem;">Monitor Antrian Ruang Tunggu</div>
-        <div class="d-flex align-items-center">
-            <span id="lastUpdated" class="text-muted mr-3" style="font-size: 1.2rem; margin-right: 20px;">Diperbarui: -</span>
-            <button id="btnFullscreen" class="btn btn-primary" style="font-size: 1.2rem; padding: 0.8rem 1.5rem;">Layar Penuh</button>
-        </div>
-    </nav>
+<nav class="navbar layar-nav">
+<div class="navbar-brand" style="font-size: 1.8rem;">Monitor Antrian Ruang Tunggu</div>
+<div class="layar-controls">
+<span id="lastUpdated" class="layar-updated">Diperbarui: -</span>
+<button id="btnFullscreen" class="btn btn-primary" type="button">Layar Penuh</button>
+<button id="btnExit" class="btn btn-danger" type="button">Keluar</button>
+</div>
+</nav>
 
-    <div class="container" style="max-width: 1400px;">
-        <div id="layarGrid" class="grid" style="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem;">
-        </div>
-    </div>
+<main class="container layar-container">
+<section id="layarHero" class="layar-hero">
+<p class="layar-hero-label">Sedang Dipanggil</p>
+<p id="heroNumber" class="layar-hero-number">---</p>
+<p id="heroService" class="layar-hero-service">Menunggu panggilan</p>
+</section>
+
+<div id="layarGrid" class="layar-grid"></div>
+</main>
 </body>
 
 </html>

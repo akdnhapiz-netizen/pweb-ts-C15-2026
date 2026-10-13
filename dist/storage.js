@@ -1,5 +1,4 @@
 export class StorageManager {
-    // --- AUTHENTICATION ---
     static getAuth() {
         const data = localStorage.getItem('authData');
         return data ? JSON.parse(data) : null;
@@ -10,7 +9,6 @@ export class StorageManager {
     static clearAuth() {
         localStorage.removeItem('authData');
     }
-    // --- QUEUE TYPES (MASTER DATA) ---
     static getQueueTypes() {
         const data = localStorage.getItem('queueTypes');
         return data ? JSON.parse(data) : [];
@@ -18,7 +16,6 @@ export class StorageManager {
     static setQueueTypes(types) {
         localStorage.setItem('queueTypes', JSON.stringify(types));
     }
-    // --- TICKETS ---
     static getTickets() {
         const data = localStorage.getItem('tickets');
         return data ? JSON.parse(data) : [];
@@ -26,7 +23,6 @@ export class StorageManager {
     static setTickets(tickets) {
         localStorage.setItem('tickets', JSON.stringify(tickets));
     }
-    // Fungsi bantuan untuk men-trigger sinkronisasi antar tab/halaman
     static triggerUpdate() {
         window.dispatchEvent(new Event('storageUpdated'));
     }

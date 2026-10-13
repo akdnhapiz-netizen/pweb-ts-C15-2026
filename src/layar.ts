@@ -1,112 +1,180 @@
-import { StorageManager, QueueType, Ticket } from './storage.js';
+import { StorageManager } from './storage.js';
+import type { QueueType, Ticket } from './storage.js';
 
-class LayarAntrian {
-    private gridContainer = document.getElementById('layarGrid') as HTMLDivElement;
-    private btnFullscreen = document.getElementById('btnFullscreen') as HTMLButtonElement;
-    private lastUpdated = document.getElementById('lastUpdated') as HTMLSpanElement;
+class QueueDisplay {
+    private lastCalled: Record<string, string> = {};
+    private heroTicketId = '';
+    private firstRender = true;
 
     constructor() {
-        this.initEvents();
+        console.log('layar.js versi baru aktif');
 
-        this.renderLayar();
+        document.addEventListener('click', (e) => this.handleClick(e));
+        document.addEventListener('fullscreenchange', () => this.syncFullscreenLabel());
 
-        setInterval(() => {
-            this.renderLayar();
-        }, 2500); 
+        this.render();
+
+        window.addEventListener('storage', () => this.render());
+        window.addEventListener('storageUpdated', () => this.render());
+
+        setInterval(() => this.render(), 2000);
     }
 
-    private initEvents(): void {
-        this.btnFullscreen.addEventListener('click', () => this.toggleFullscreen());
+    private handleClick(e: Event): void {
+        const target = e.target as HTMLElement | null;
+        if (!target) return;
+
+        const btn = target.closest('button');
+        if (!btn) return;
+
+        if (btn.id === 'btnFullscreen') this.toggleFullscreen();
+        if (btn.id === 'btnExit') this.handleExit();
     }
 
-    private renderLayar(): void {
-        const queues = StorageManager.getQueueTypes().filter(q => q.isActive);
-        const tickets = StorageManager.getTickets();
-
-        this.gridContainer.innerHTML = '';
-
-        if (queues.length === 0) {
-            this.gridContainer.innerHTML = `
-                <div class="text-center text-muted w-100" style="grid-column: 1 / -1; margin-top: 100px;">
-                    <h2 style="font-size: 2.5rem; color: var(--text-muted);">Belum ada antrian yang aktif.</h2>
-                    <p style="font-size: 1.5rem;">Silakan tunggu instruksi dari petugas.</p>
-                </div>`;
-            this.updateTimestamp();
-            return;
+    private handleExit(): void {
+        if (document.fullscreenElement) {
+            document.exitFullscreen().catch(() => undefined);
         }
 
-        queues.forEach(queue => {
-            const queueTickets = tickets.filter(t => t.queueCode === queue.code);
-            
-            const currentTicket = queueTickets.find(t => t.status === 'Dipanggil');
-            
-            const waitingCount = queueTickets.filter(t => t.status === 'Menunggu').length;
-
-            this.createLayarCard(queue, currentTicket, waitingCount);
-        });
-
-        this.updateTimestamp();
-    }
-
-    private createLayarCard(queue: QueueType, currentTicket: Ticket | undefined, waitingCount: number): void {
-        const card = document.createElement('div');
-        card.className = currentTicket ? 'card ticket-active' : 'card';
-        card.style.textAlign = 'center';
-        card.style.padding = '3rem 2rem';
-        card.style.borderRadius = '15px';
-
-        let ticketDisplayHtml = '';
-        
-        if (currentTicket) {
-            ticketDisplayHtml = `
-                <div class="status-badge status-dipanggil" style="margin-bottom: 1.5rem; display: inline-block; font-size: 1rem; padding: 0.5rem 1rem;">SEDANG DIPANGGIL</div>
-                <div style="font-size: 6rem; font-weight: 800; color: var(--primary); line-height: 1; letter-spacing: -2px;">${currentTicket.displayNumber}</div>
-            `;
-        } else {
-            ticketDisplayHtml = `
-                <div style="margin-bottom: 1.5rem; color: transparent; font-size: 1rem; padding: 0.5rem 1rem;">-</div>
-                <div style="font-size: 2rem; font-weight: 500; color: #adb5bd; padding: 2rem 0;">Belum ada antrian</div>
-            `;
-        }
-
-        card.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--secondary); padding-bottom: 15px; margin-bottom: 30px;">
-                <h3 style="margin: 0; font-size: 1.8rem; color: var(--dark);">${queue.name}</h3>
-                <span style="background: var(--secondary); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; color: var(--text-muted);">${queue.code}</span>
-            </div>
-            
-            ${ticketDisplayHtml}
-            
-            <div style="margin-top: 3rem; border-top: 2px solid var(--secondary); padding-top: 20px;">
-                <span class="text-muted" style="font-size: 1.3rem; font-weight: 500;">Sisa antrian: <strong>${waitingCount}</strong> orang</span>
-            </div>
-        `;
-
-        this.gridContainer.appendChild(card);
-    }
-
-    private updateTimestamp(): void {
-        const now = new Date();
-        const timeString = now.toLocaleTimeString('id-ID', { hour12: false }).replace(/:/g, '.');
-        this.lastUpdated.textContent = `Diperbarui ${timeString}`;
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 100);
     }
 
     private toggleFullscreen(): void {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(err => {
-                console.error(`Error attempting to enable fullscreen: ${err.message}`);
-                alert("Browser Anda memblokir fitur Layar Penuh. Coba klik di area kosong terlebih dahulu.");
-            });
-            this.btnFullscreen.textContent = "Keluar Layar Penuh";
-            this.btnFullscreen.classList.replace('btn-primary', 'btn-secondary');
+        if (document.fullscreenElement) {
+            document.exitFullscreen().catch(() => undefined);
         } else {
-            document.exitFullscreen();
-            this.btnFullscreen.textContent = "Layar Penuh";
-            this.btnFullscreen.classList.replace('btn-secondary', 'btn-primary');
+            document.documentElement.requestFullscreen().catch(() => {
+                alert('Browser tidak mengizinkan mode layar penuh.');
+            });
         }
+    }
+
+    private syncFullscreenLabel(): void {
+        const btn = document.getElementById('btnFullscreen');
+        if (!btn) return;
+        btn.textContent = document.fullscreenElement ? 'Keluar Layar Penuh' : 'Layar Penuh';
+    }
+
+    private render(): void {
+        const grid = document.getElementById('layarGrid');
+        if (!grid) return;
+
+        const queues = StorageManager.getQueueTypes().filter(q => q.isActive);
+        const tickets = StorageManager.getTickets();
+
+        grid.innerHTML = '';
+
+        if (queues.length === 0) {
+            const empty = document.createElement('p');
+            empty.className = 'text-muted';
+            empty.textContent = 'Belum ada layanan aktif.';
+            grid.appendChild(empty);
+        }
+
+        queues.forEach(queue => {
+            const current = tickets.find(t => t.queueCode === queue.code && t.status === 'Dipanggil');
+            const waitingCount = tickets.filter(t => t.queueCode === queue.code && t.status === 'Menunggu').length;
+
+            const nowNumber = current ? current.displayNumber : '';
+            const isNewCall = current !== undefined && nowNumber !== this.lastCalled[queue.code] && !this.firstRender;
+            this.lastCalled[queue.code] = nowNumber;
+
+            if (isNewCall && current) {
+                this.heroTicketId = current.id;
+                this.flashHero();
+            }
+
+            grid.appendChild(this.createCard(queue, current, waitingCount, isNewCall));
+        });
+
+        this.renderHero(tickets, queues);
+        this.updateTime();
+        this.firstRender = false;
+    }
+
+    private renderHero(tickets: Ticket[], queues: QueueType[]): void {
+        const heroNumber = document.getElementById('heroNumber');
+        const heroService = document.getElementById('heroService');
+        if (!heroNumber || !heroService) return;
+
+        const activeCodes = queues.map(q => q.code);
+        const called = tickets.filter(t => t.status === 'Dipanggil' && activeCodes.indexOf(t.queueCode) !== -1);
+
+        let heroTicket = called.find(t => t.id === this.heroTicketId);
+        if (!heroTicket) heroTicket = called[0];
+
+        if (heroTicket) {
+            this.heroTicketId = heroTicket.id;
+            heroNumber.textContent = heroTicket.displayNumber;
+            heroService.textContent = heroTicket.serviceName;
+        } else {
+            this.heroTicketId = '';
+            heroNumber.textContent = '---';
+            heroService.textContent = 'Menunggu panggilan';
+        }
+    }
+
+    private createCard(queue: QueueType, current: Ticket | undefined, waitingCount: number, isNewCall: boolean): HTMLElement {
+        const card = document.createElement('article');
+        card.className = 'layar-card';
+        if (current) card.classList.add('is-active');
+        if (isNewCall) card.classList.add('highlight');
+
+        const head = document.createElement('div');
+        head.className = 'layar-card-head';
+
+        const code = document.createElement('span');
+        code.className = 'layar-code';
+        code.textContent = queue.code;
+
+        const name = document.createElement('h3');
+        name.textContent = queue.name;
+
+        head.append(code, name);
+
+        const number = document.createElement('p');
+        if (current) {
+            number.className = 'layar-number';
+            number.textContent = current.displayNumber;
+        } else {
+            number.className = 'layar-number layar-number--empty';
+            number.textContent = 'Belum ada antrian';
+        }
+
+        const foot = document.createElement('div');
+        foot.className = 'layar-foot';
+
+        const status = document.createElement('span');
+        status.className = current ? 'status-badge status-dipanggil' : 'status-badge status-menunggu';
+        status.textContent = current ? 'Dipanggil' : 'Kosong';
+
+        const waiting = document.createElement('span');
+        waiting.textContent = `Sisa antrian: ${waitingCount} orang`;
+
+        foot.append(status, waiting);
+
+        card.append(head, number, foot);
+        return card;
+    }
+
+    private flashHero(): void {
+        const hero = document.getElementById('layarHero');
+        if (!hero) return;
+        hero.classList.remove('flash');
+        void hero.offsetWidth;
+        hero.classList.add('flash');
+    }
+
+    private updateTime(): void {
+        const el = document.getElementById('lastUpdated');
+        if (!el) return;
+        const now = new Date();
+        el.textContent = `Diperbarui: ${now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
     }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    new LayarAntrian();
+    new QueueDisplay();
 });

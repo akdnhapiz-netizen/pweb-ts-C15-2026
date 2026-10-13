@@ -3,20 +3,22 @@ export type Priority = 'Normal' | 'Lansia' | 'Disabilitas' | 'VIP';
 export type TicketStatus = 'Menunggu' | 'Dipanggil' | 'Selesai' | 'Dilewati';
 
 export interface QueueType {
-    code: string; // Tepat 1 huruf kapital (misal: 'A')
-    name: string; // Nama layanan (misal: 'Poli Umum')
+    code: string;
+    name: string;
     isActive: boolean;
 }
 
 export interface Ticket {
-    id: string; 
+    id: string;
     queueCode: string;
-    ticketNumber: number; // Urutan angka, misal: 1
-    displayNumber: string; // Format cetak, misal: 'A-001'
+    ticketNumber: number;
+    displayNumber: string;
     priority: Priority;
     status: TicketStatus;
     serviceName: string;
-    createdAt: number; 
+    createdAt: number;
+    calledAt?: number;
+    skippedAt?: number;
 }
 
 export interface AuthData {
@@ -26,7 +28,6 @@ export interface AuthData {
 }
 
 export class StorageManager {
-    // --- AUTHENTICATION ---
     static getAuth(): AuthData | null {
         const data = localStorage.getItem('authData');
         return data ? JSON.parse(data) : null;
@@ -38,7 +39,6 @@ export class StorageManager {
         localStorage.removeItem('authData');
     }
 
-    // --- QUEUE TYPES (MASTER DATA) ---
     static getQueueTypes(): QueueType[] {
         const data = localStorage.getItem('queueTypes');
         return data ? JSON.parse(data) : [];
@@ -47,7 +47,6 @@ export class StorageManager {
         localStorage.setItem('queueTypes', JSON.stringify(types));
     }
 
-    // --- TICKETS ---
     static getTickets(): Ticket[] {
         const data = localStorage.getItem('tickets');
         return data ? JSON.parse(data) : [];
@@ -55,8 +54,7 @@ export class StorageManager {
     static setTickets(tickets: Ticket[]): void {
         localStorage.setItem('tickets', JSON.stringify(tickets));
     }
-    
-    // Fungsi bantuan untuk men-trigger sinkronisasi antar tab/halaman
+
     static triggerUpdate(): void {
         window.dispatchEvent(new Event('storageUpdated'));
     }
